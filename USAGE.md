@@ -1,33 +1,35 @@
 ## Usage
 Services: [Backup](USAGE.md#backup), [Delete](USAGE.md#delete), [Deploy (import)](/USAGE.md#deploy-import), [Oauth example](/USAGE.md#oauth-example)
+#### Apex application id defined in the url!
+For example when application id=666: ````http://localhost:8080/ords-pdb1/admin/backup/app/666````
 
 ## Security
 At least basic authentication is strongly recommended. Use without authentication is not recommended!
 - #### Basic authentication: '--user <apex_workspace_user_name>:<apex_workspace_user_password>"
 - #### Oauth authentication: '-H "Authorization: Bearer <previously_queried_token>"'
-## Backup
 
+## Backup
 #### Linux:
 ```
 curl -X GET --remote-name --remote-header-name \
-  --user deploy:secret \
+  --user backup:secret \
   -H "Accept: application/sql" \
   http://localhost:8080/ords-pdb1/admin/backup/app/666
   
 curl -X GET --remote-name --remote-header-name \
-  --user deploy:secret \
+  --user backup:secret \
   -H "Accept: application/zip" \
   http://localhost:8080/ords-pdb1/admin/backup/app/666
 ```
 #### Windows:
 ```
 curl -X GET --remote-name --remote-header-name ^
-  --user deploy:secret ^
+  --user backup:secret ^
   -H "Accept: application/sql" ^
   http://localhost:8080/ords-pdb1/admin/backup/app/666
   
 curl -X GET --remote-name --remote-header-name ^
-  --user deploy:secret ^
+  --user backup:secret ^
   -H "Accept: application/zip" ^
   http://localhost:8080/ords-pdb1/admin/backup/app/666
 ```
