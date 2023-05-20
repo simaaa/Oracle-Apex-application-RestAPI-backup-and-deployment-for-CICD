@@ -1,5 +1,6 @@
 ## Usage
-Services: Backup, Delete, Deploy (import)
+Services: [Backup](USAGE.md#backup), [Delete](USAGE.md#delete), [Deploy (import)](USAGE.md#deploy)
+[Oauth examples](USAGE.md#oauth)
 
 ## Backup
 
@@ -49,5 +50,12 @@ curl -X PUT ^
   -H "Content-Type: application/sql" ^
   --data-binary @f666.sql ^
   http://localhost:8080/ords-pdb1/admin/deploy/app/666
+```
 
+##Oauth example
+```
+curl -X GET --remote-name --remote-header-name ^
+  --user deploy:secret ^
+  -H "Accept: application/sql" ^
+  http://localhost:8080/ords-pdb1/admin/backup/app/666
 ```
