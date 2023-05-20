@@ -37,6 +37,8 @@ curl -X GET --remote-name --remote-header-name ^
 This solution requires a working [Oracle Application Express - APEX](https://apex.oracle.com)
 ([Oracle REST Data Services - ORDS](https://www.oracle.com/database/technologies/appdev/rest.html))
 
+For deleting and importing Apex application in different Apex workspace, the APEX_ADMIN database user required APEX_ADMINISTRATOR_ROLE database role.
+
 ## Installation
 [Installation](install/README.md)
 
