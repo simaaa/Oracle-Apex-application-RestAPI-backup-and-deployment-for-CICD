@@ -11,8 +11,8 @@ Set the username and password for basic authentication with curl ````--user```` 
 #### Content type
 - application/sql: Apex application backup in sql script format
 - application/zip: Apex application backup in yaml compressed format (zip)
-##### Backup: Set the backup type in the "Accept" header variable. ````-H "Accept: application/sql"````
-##### Deploy: Set the deploy/import file type in the "Content-Type" header variable. ````-H "Content-Type: application/sql"````
+##### Backup: Set the backup type in the "Accept" header variable: ````-H "Accept: application/sql"````
+##### Deploy: Set the deploy/import file type in the "Content-Type" header variable: ````-H "Content-Type: application/sql"````
 
 ## Usage
 #### Linux:
