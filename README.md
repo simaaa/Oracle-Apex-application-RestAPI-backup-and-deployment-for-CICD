@@ -10,24 +10,24 @@ Set the username and password for basic authentication and set the backup type i
 #### Linux:
 ```
 curl -X GET --remote-name --remote-header-name \
-  --user deploy:secret \
+  --user backup:secret \
   -H "Accept: application/sql" \
   http://localhost:8080/ords-pdb1/admin/backup/app/666
   
 curl -X GET --remote-name --remote-header-name \
-  --user deploy:secret \
+  --user backup:secret \
   -H "Accept: application/zip" \
   http://localhost:8080/ords-pdb1/admin/backup/app/666
 ```
 #### Windows:
 ```
 curl -X GET --remote-name --remote-header-name ^
-  --user deploy:secret ^
+  --user backup:secret ^
   -H "Accept: application/sql" ^
   http://localhost:8080/ords-pdb1/admin/backup/app/666
   
 curl -X GET --remote-name --remote-header-name ^
-  --user deploy:secret ^
+  --user backup:secret ^
   -H "Accept: application/zip" ^
   http://localhost:8080/ords-pdb1/admin/backup/app/666
 ```
@@ -38,6 +38,9 @@ This solution requires a working [Oracle Application Express - APEX](https://ape
 ([Oracle REST Data Services - ORDS](https://www.oracle.com/database/technologies/appdev/rest.html))
 
 For deleting and importing Apex application in different Apex workspace, the APEX_ADMIN database user required APEX_ADMINISTRATOR_ROLE database role.
+```
+GRANT APEX_ADMINISTRATOR_ROLE TO APEX_ADMIN;
+```
 
 ## Installation
 [Installation](install/README.md)
