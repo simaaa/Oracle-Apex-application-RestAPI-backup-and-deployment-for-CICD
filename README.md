@@ -8,10 +8,11 @@ You can backup and deploy Oracle Apex applications very simple with curl command
 Defined in the url, for example when application id=666: ````http://localhost:8080/ords-pdb1/admin/backup/app/666````
 #### Authentication
 Set the username and password for basic authentication with curl ````--user```` parameter or in the http header when using oauth.
-#### Backup content type
-Set the backup type in the "Accept" header variable using the following.
+#### Content type
 - application/sql: Apex application backup in sql script format
 - application/zip: Apex application backup in yaml compressed format (zip)
+##### Backup: Set the backup type in the "Accept" header variable. ````-H "Accept: application/sql"````
+##### Deploy: Set the deploy/import file type in the "Content-Type" header variable. ````-H "Content-Type: application/sql"````
 
 ## Usage
 #### Linux:
