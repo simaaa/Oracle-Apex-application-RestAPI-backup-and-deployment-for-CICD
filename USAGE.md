@@ -1,6 +1,8 @@
 ## Usage
-Services: [Backup](USAGE.md#backup), [Delete](USAGE.md#delete), [Deploy (import)](USAGE.md#deploy)
-[Oauth examples](USAGE.md#oauth)
+Services: [Backup](USAGE.md#backup), [Delete](USAGE.md#delete), [Deploy (import)](/USAGE.md#deploy)
+[Oauth examples](/USAGE.md#oauth)
+
+[DELETE](https://github.com/simaaa/Oracle-Apex-application-RestAPI-backup-and-deployment-for-CICD/blob/main/USAGE.md#delete)
 
 ## Backup
 
