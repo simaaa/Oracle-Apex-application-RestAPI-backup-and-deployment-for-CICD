@@ -31,6 +31,7 @@ curl -X GET --remote-name --remote-header-name ^
   -H "Accept: application/zip" ^
   http://localhost:8080/ords-pdb1/admin/backup/app/666
 ```
+[Additional usage examples](USAGE.md)
 
 ## Requirements
 This solution requires a working [Oracle Application Express - APEX](https://apex.oracle.com)
