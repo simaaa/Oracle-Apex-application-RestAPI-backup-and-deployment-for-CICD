@@ -1,7 +1,5 @@
 ## Usage
-Services: [Backup](USAGE.md#backup), [Delete](USAGE.md#delete), [Deploy (import)](/USAGE.md#deploy-import), [Oauth examples](/USAGE.md#oauth-example)
-
-[DELETE](https://github.com/simaaa/Oracle-Apex-application-RestAPI-backup-and-deployment-for-CICD/blob/main/USAGE.md#delete)
+Services: [Backup](USAGE.md#backup), [Delete](USAGE.md#delete), [Deploy (import)](/USAGE.md#deploy-import), [Oauth example](/USAGE.md#oauth-example)
 
 ## Backup
 
@@ -54,9 +52,26 @@ curl -X PUT ^
 ```
 
 ## Oauth example
+#### Requirements:
+- Oauth installation for backup and/or deploy using installation scripts (41_oauth_install_backup.pdc, 41_oauth_install_deploy.pdc)
+- HTTP SSL configuration for ORDS on the server to request oauth token
+- ["jq" solution](https://stedolan.github.io/jq) for parsing json content ([install on Winddows](https://bobbyhadz.com/blog/install-and-use-jq-on-windows))
+
 ```
+@Echo Off
+SET CLIENT_ID=4iPHoc4n7eShh9H_XvZMnA..
+SET CLIENT_SECRET=22KDuJRLSJcuamKPE-9XNw..
+FOR /F %%I in ('
+curl -X POST ^
+  --user "%CLIENT_ID%:%CLIENT_SECRET%" ^
+  --data-raw "grant_type=client_credentials" ^
+  --insecure ^
+  https://localhost:8080/ords-pdb1/admin/oauth/token ^| jq -r ".access_token"
+') DO SET OAUTH_TOKEN=%%I
+ECHO OAUTH_TOKEN=%OAUTH_TOKEN%
+
 curl -X GET --remote-name --remote-header-name ^
-  --user deploy:secret ^
+  -H "Authorization: Bearer %OAUTH_TOKEN%" ^
   -H "Accept: application/sql" ^
   http://localhost:8080/ords-pdb1/admin/backup/app/666
 ```
