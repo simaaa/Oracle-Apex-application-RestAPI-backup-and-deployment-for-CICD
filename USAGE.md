@@ -1,6 +1,6 @@
 ## Usage
 Services: [Backup](USAGE.md#backup), [Delete](USAGE.md#delete), [Deploy (import)](/USAGE.md#deploy-import), [Oauth example](/USAGE.md#oauth-example)
-#### Apex application id defined in the url!
+#### The Apex application id is defined in the url!
 For example when application id=666: ````http://localhost:8080/ords-pdb1/admin/backup/app/666````
 
 ## Security
