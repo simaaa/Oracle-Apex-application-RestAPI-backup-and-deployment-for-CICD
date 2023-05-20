@@ -13,12 +13,22 @@ curl -X GET --remote-name --remote-header-name \
   --user deploy:secret \
   -H "Accept: application/sql" \
   http://localhost:8080/ords-pdb1/admin/backup/app/666
+  
+curl -X GET --remote-name --remote-header-name \
+  --user deploy:secret \
+  -H "Accept: application/zip" \
+  http://localhost:8080/ords-pdb1/admin/backup/app/666
 ```
 #### Windows:
 ```
 curl -X GET --remote-name --remote-header-name ^
   --user deploy:secret ^
   -H "Accept: application/sql" ^
+  http://localhost:8080/ords-pdb1/admin/backup/app/666
+  
+curl -X GET --remote-name --remote-header-name ^
+  --user deploy:secret ^
+  -H "Accept: application/zip" ^
   http://localhost:8080/ords-pdb1/admin/backup/app/666
 ```
 
