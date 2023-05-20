@@ -1,4 +1,9 @@
 ## Installation
+Sometimes it may be necessary to assign the privilege of inheritance to the user SYS:
+```
+GRANT INHERIT PRIVILEGES ON USER SYS TO ORDS_METADATA;
+```
+
 ### Oracle database user Apex workspace
 Execute scripts as SYS database user.
 ```
@@ -25,4 +30,3 @@ Execute scripts as APEX_ADMIN database user.
 ```
 31_create_rest_module_deploy.pdc
 ```
-
