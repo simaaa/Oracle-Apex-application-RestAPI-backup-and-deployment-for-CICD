@@ -6,19 +6,15 @@ You can backup and deploy Oracle Apex applications very simple with curl command
 ## Usage
 #### Linux:
 ```
-curl -X GET \
+curl -X GET --remote-name --remote-header-name \
   --user deploy:secret \
-  --remote-name \
-  --remote-header-name \
   -H "Accept: application/sql" \
   http://localhost:8080/ords-pdb1/admin/backup/app/666
 ```
 #### Windows:
 ```
-curl -X GET ^
+curl -X GET --remote-name --remote-header-name ^
   --user deploy:secret ^
-  --remote-name ^
-  --remote-header-name ^
   -H "Accept: application/sql" ^
   http://localhost:8080/ords-pdb1/admin/backup/app/666
 ```
