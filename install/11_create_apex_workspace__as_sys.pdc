@@ -1,0 +1,64 @@
+WHENEVER SQLERROR EXIT SQL.SQLCODE ROLLBACK
+
+-- Checking username
+SET FEEDBACK OFF;
+BEGIN IF USER != 'SYS' THEN RAISE_APPLICATION_ERROR(-20000, 'EXECUTE AS SYS!'); END IF; END;
+/
+
+SET FEEDBACK ON;
+SET SERVEROUTPUT ON;
+DECLARE
+  c_NEW_WS_NAME              CONSTANT VARCHAR2(100) := UPPER('APEX_ADMIN'); -- New Apex workspace name
+  c_NEW_WS_SCHEMA            CONSTANT VARCHAR2(100) := UPPER('APEX_ADMIN'); -- New Apex workspace assigned database schema
+  c_NEW_WS_ADM_USR           CONSTANT VARCHAR2(100) := UPPER('ADMIN');      -- New Apex workspace administrator username
+  c_NEW_WS_ADM_PWD           CONSTANT VARCHAR2(100) := 'admin';             -- New Apex workspace administrator password
+  c_NEW_REST_PREFIX          CONSTANT VARCHAR2(100) := UPPER('ADMIN');      -- WORKSPACE\Component Availability\RESTful Path Prefix
+  c_CREATE_DEMO_END_USER     CONSTANT BOOLEAN := FALSE;                     -- Create demo end user into new workspace
+BEGIN
+  APEX_UTIL.set_security_group_id(p_security_group_id => APEX_UTIL.find_security_group_id(p_workspace => 'INTERNAL'));
+  APEX_APPLICATION.g_user := USER;
+  
+  -- Create and configure Apex workspace
+  APEX_INSTANCE_ADMIN.add_workspace(
+    p_workspace_id   => NULL,
+    p_workspace      => c_NEW_WS_NAME,
+    p_primary_schema => c_NEW_WS_SCHEMA
+  );
+  APEX_INSTANCE_ADMIN.set_workspace_parameter(
+    p_workspace => c_NEW_WS_NAME,
+    p_parameter => 'PATH_PREFIX',
+    p_value     => c_NEW_REST_PREFIX
+  );
+  UPDATE APEX_220200.wwv_flow_companies t SET
+    t.allow_to_be_purged_yn     = 'N',
+    t.allow_team_development_yn = 'N',
+    t.expire_fnd_user_accounts  = 'N'
+  WHERE t.short_name = c_NEW_WS_NAME;
+  
+  -- Create administrator and demo users into new Apex workspace
+  APEX_UTIL.set_security_group_id(p_security_group_id => APEX_UTIL.find_security_group_id(p_workspace => c_NEW_WS_NAME));
+  APEX_UTIL.create_user(
+    p_user_name                    => c_NEW_WS_ADM_USR,
+    p_email_address                => c_NEW_WS_ADM_USR,
+    p_default_schema               => c_NEW_WS_SCHEMA,
+    p_web_password                 => c_NEW_WS_ADM_PWD,
+    p_developer_privs              => 'ADMIN:CREATE:DATA_LOADER:EDIT:HELP:MONITOR:SQL',
+    p_change_password_on_first_use => 'N'
+  );
+  IF c_CREATE_DEMO_END_USER THEN
+    APEX_UTIL.create_user(
+      p_user_name                    => 'demo',
+      p_first_name                   => 'demo',
+      p_last_name                    => 'demo',
+      p_email_address                => 'demo@demo.hu',
+      p_default_schema               => c_NEW_WS_SCHEMA,
+      p_web_password                 => 'demo',
+      p_developer_privs              => NULL,
+      p_change_password_on_first_use => 'N'
+    );
+  END IF;
+  
+  COMMIT;
+END;
+/
+SHOW ERROR

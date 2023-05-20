@@ -1,0 +1,116 @@
+WHENEVER SQLERROR EXIT SQL.SQLCODE ROLLBACK
+
+-- Checking username
+SET FEEDBACK OFF;
+BEGIN IF USER = 'SYS' THEN RAISE_APPLICATION_ERROR(-20000, 'DO NOT EXECUTE AS SYS!'); END IF; END;
+/
+
+SET FEEDBACK ON;
+SET SERVEROUTPUT ON;
+BEGIN
+    ORDS.delete_module( p_module_name => APEX_APP_DEPLOY.GC_ORDS_MODULE_NAME );
+    ORDS.define_module(
+        p_module_name => APEX_APP_DEPLOY.GC_ORDS_MODULE_NAME,
+        p_base_path   => APEX_APP_DEPLOY.GC_ORDS_MODULE_PATH,
+        p_comments    => 'Apex application deployment ORDS module' );
+
+    ORDS.define_template(
+        p_module_name    => APEX_APP_DEPLOY.GC_ORDS_MODULE_NAME,
+        p_pattern        => ':app_id' );
+
+    ----------------------------------------------------------------------------
+    -- Delete Handler
+    --
+    -- Parameters:
+    -- * app_id             (URL)      ID of the application to delete
+    -- * X-Target-Workspace (HEADER)   Target Apex workspace
+    --
+    -- Example:
+    -- curl -X DELETE 
+    --      -H "X-Target-Workspace: TARGET_APEX_WORKSPACE"
+    --      http://localhost:8080/ords/schema/deploy/app/102
+    ----------------------------------------------------------------------------
+    ORDS.define_handler(
+        p_module_name    => APEX_APP_DEPLOY.GC_ORDS_MODULE_NAME,
+        p_pattern        => ':app_id',
+        p_method         => 'DELETE',
+        p_comments       => 'DELETE Apex application',
+        p_source_type    => ORDS.source_type_plsql,
+        p_source         => 
+q'~BEGIN 
+    APEX_APP_DEPLOY.delete( 
+        p_application_id => :app_id,
+        p_in_workspace   => :workspace );
+EXCEPTION
+    WHEN OTHERS THEN
+        HTP.P(SQLERRM);
+        :status_code := 500;
+END;~' );
+
+    ORDS.define_parameter(
+        p_module_name        => APEX_APP_DEPLOY.GC_ORDS_MODULE_NAME,
+        p_pattern            => ':app_id',
+        p_method             => 'DELETE',
+        p_name               => 'X-Target-Workspace',
+        p_bind_variable_name => 'WORKSPACE',
+        p_source_type        => 'HEADER' );
+
+    ----------------------------------------------------------------------------
+    -- Import Handler
+    --
+    -- Parameters:
+    -- * app_id             (URL)      ID of the application to export
+    -- * Content-Type       (HEADER)   Import file type, sql or zip
+    -- * X-Target-Workspace (HEADER)   Target Apex workspace
+    -- *                    (BODY)     Importable file content
+    --
+    -- Example:
+    -- curl -X PUT 
+    --      -H "X-Target-Workspace: TARGET_APEX_WORKSPACE"
+    --      -H "Content-Type: application/sql"
+    --      --data-binary @f102.sql
+    --      http://localhost:8080/ords/schema/deploy/app/102
+    -- curl -X PUT 
+    --      -H "X-Target-Workspace: TARGET_APEX_WORKSPACE"
+    --      -H "Content-Type: application/zip"
+    --      --data-binary @f102.zip
+    --      http://localhost:8080/ords/admin/deploy/app/102
+    ----------------------------------------------------------------------------
+    ORDS.define_handler(
+        p_module_name    => APEX_APP_DEPLOY.GC_ORDS_MODULE_NAME,
+        p_pattern        => ':app_id',
+        p_method         => 'PUT',
+        p_comments       => 'IMPORT Apex application',
+        p_source_type    => ORDS.source_type_plsql,
+        p_source         => 
+q'~BEGIN 
+    APEX_APP_DEPLOY.import( 
+        p_application_id => :app_id,
+        p_mimetype       => :content_type,
+        p_to_workspace   => :workspace,
+        p_export_file    => :body );
+EXCEPTION
+    WHEN OTHERS THEN
+        HTP.P(SQLERRM);
+        :status_code := 500;
+END;~' );
+
+    ORDS.define_parameter(
+        p_module_name        => APEX_APP_DEPLOY.GC_ORDS_MODULE_NAME,
+        p_pattern            => ':app_id',
+        p_method             => 'PUT',
+        p_name               => 'Content-Type',
+        p_bind_variable_name => 'CONTENT_TYPE',
+        p_source_type        => 'HEADER' );
+    ORDS.define_parameter(
+        p_module_name        => APEX_APP_DEPLOY.GC_ORDS_MODULE_NAME,
+        p_pattern            => ':app_id',
+        p_method             => 'PUT',
+        p_name               => 'X-Target-Workspace',
+        p_bind_variable_name => 'WORKSPACE',
+        p_source_type        => 'HEADER' );
+
+  COMMIT;
+END;
+/
+SHOW ERROR

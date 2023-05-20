@@ -1,0 +1,112 @@
+WHENEVER SQLERROR EXIT SQL.SQLCODE ROLLBACK
+
+-- Checking username
+SET FEEDBACK OFF;
+BEGIN IF USER = 'SYS' THEN RAISE_APPLICATION_ERROR(-20000, 'DO NOT EXECUTE AS SYS!'); END IF; END;
+/
+
+SET FEEDBACK ON;
+SET SERVEROUTPUT ON;
+BEGIN
+    ORDS.delete_module( p_module_name => APEX_APP_DEPLOY.GC_ORDS_BK_MODULE_NAME );
+    ORDS.define_module(
+        p_module_name => APEX_APP_DEPLOY.GC_ORDS_BK_MODULE_NAME,
+        p_base_path   => APEX_APP_DEPLOY.GC_ORDS_BK_MODULE_PATH,
+        p_comments    => 'Apex application backup ORDS module' );
+
+    ORDS.define_template(
+        p_module_name    => APEX_APP_DEPLOY.GC_ORDS_BK_MODULE_NAME,
+        p_pattern        => ':app_id' );
+
+    ----------------------------------------------------------------------------
+    -- Export Handler for Apex application
+    -- 
+    -- Parameters:
+    -- * app_id (URL)                  ID of the application to export
+    -- * Accept (HEADER)               Format in which to return the export file
+    --
+    -- Example:
+    -- curl -X GET 
+    --      --remote-name --remote-header-name 
+    --      -H "Accept: application/sql"
+    --      http://localhost:8080/ords/admin/backup/app/102
+    -- curl -X GET
+    --      --remote-name --remote-header-name 
+    --      -H "Accept: application/zip"
+    --      http://localhost:8080/ords/admin/backup/app/102
+    ----------------------------------------------------------------------------
+    ORDS.define_handler(
+        p_module_name    => APEX_APP_DEPLOY.GC_ORDS_BK_MODULE_NAME,
+        p_pattern        => ':app_id',
+        p_method         => 'GET',
+        p_comments       => 'EXPORT Apex application',
+        p_source_type    => ORDS.source_type_plsql,
+        p_source         => 
+q'~BEGIN 
+    APEX_APP_DEPLOY.export( 
+        p_application_id => :app_id,
+        p_components     => null,
+        p_mimetype       => :accept );
+EXCEPTION
+    WHEN OTHERS THEN
+        HTP.P(SQLERRM);
+        :status_code := 500;
+END;~' );
+
+    ORDS.define_parameter(
+        p_module_name        => APEX_APP_DEPLOY.GC_ORDS_BK_MODULE_NAME,
+        p_pattern            => ':app_id',
+        p_method             => 'GET',
+        p_name               => 'Accept',
+        p_bind_variable_name => 'ACCEPT',
+        p_source_type        => 'HEADER' );
+
+    -- ----------------------------------------------------------------------------------------------------
+    -- Export Handler for Apex application components
+    -- 
+    -- Parameters:
+    -- * app_id (URL)                  ID of the application to export
+    -- * Accept (HEADER)               Format in which to return the export file
+    -- *        (BODY)                 Components to export, as outlined in the documentation
+    --                                 for APEX_EXPORT.GET_APPLICATION. Components separated by comma.
+    --
+    -- Example:
+    -- curl -X POST
+    --      -H "Accept: application/sql"
+    --      -d 'PAGE:1,PAGE:2'
+    --      http://localhost:8080/ords/admin/backup/app/102/components
+    ----------------------------------------------------------------------------
+    ORDS.define_template(
+        p_module_name    => APEX_APP_DEPLOY.GC_ORDS_BK_MODULE_NAME,
+        p_pattern        => ':app_id/components' );
+
+    ORDS.define_handler(
+        p_module_name    => APEX_APP_DEPLOY.GC_ORDS_BK_MODULE_NAME,
+        p_pattern        => ':app_id/components',
+        p_method         => 'POST',
+        p_comments       => 'EXPORT Apex application components',
+        p_source_type    => ORDS.source_type_plsql,
+        p_source         => 
+q'~BEGIN 
+    APEX_APP_DEPLOY.export( 
+        p_application_id => :app_id,
+        p_components     => :body_text,
+        p_mimetype       => :accept );
+EXCEPTION
+    WHEN OTHERS THEN
+        HTP.P(SQLERRM);
+        :status_code := 500;
+END;~' );
+
+    ORDS.define_parameter(
+        p_module_name        => APEX_APP_DEPLOY.GC_ORDS_BK_MODULE_NAME,
+        p_pattern            => ':app_id/components',
+        p_method             => 'POST',
+        p_name               => 'Accept',
+        p_bind_variable_name => 'ACCEPT',
+        p_source_type        => 'HEADER' );
+
+  COMMIT;
+END;
+/
+SHOW ERROR

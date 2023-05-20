@@ -1,0 +1,66 @@
+-- https://oracle-base.com/articles/misc/oracle-rest-data-services-ords-authentication
+-- https://apexapplab.dev/2021/09/07/ords-apex-and-secure-rest-apis-part-2-call-the-api
+WHENEVER SQLERROR EXIT SQL.SQLCODE ROLLBACK
+
+-- Checking username
+SET FEEDBACK OFF;
+BEGIN IF USER = 'SYS' THEN RAISE_APPLICATION_ERROR(-20000, 'DO NOT RUNNING AS SYS!'); END IF; END;
+/
+
+SET FEEDBACK ON;
+SET SERVEROUTPUT ON;
+DECLARE
+  c_ORDS_MODULE_NAME         CONSTANT VARCHAR2(100) := APEX_APP_DEPLOY.GC_ORDS_MODULE_NAME;
+  c_ORDS_OAUTH_PRIV_NAME     CONSTANT VARCHAR2(100) := APEX_APP_DEPLOY.GC_ORDS_OAUTH_PRIVILEGE_NAME;
+  c_ORDS_OAUTH_ROLE_NAME     CONSTANT VARCHAR2(100) := APEX_APP_DEPLOY.GC_ORDS_OAUTH_ROLE_NAME;
+  c_ORDS_OAUTH_CLIENT_NAME   CONSTANT VARCHAR2(1000) := APEX_APP_DEPLOY.GC_ORDS_OAUTH_CLIENT_NAME;
+  c_ORDS_OAUTH_CLIENT_EMAIL  CONSTANT VARCHAR2(100) := 'deploy@company.com';
+  v_ords_roles               SYS.OWA.vc_arr;
+  v_ords_modules             SYS.OWA.vc_arr;
+  v_ords_patterns            SYS.OWA.vc_arr;
+BEGIN
+  -- Delete ORDS role and privilege
+  ORDS.delete_role(p_role_name => c_ORDS_OAUTH_ROLE_NAME);
+  ORDS.delete_privilege(p_name => c_ORDS_OAUTH_PRIV_NAME);
+  
+  -- Create ORDS role
+  ORDS.create_role(p_role_name => c_ORDS_OAUTH_ROLE_NAME);
+  
+  -- Create ORDS privilege
+  v_ords_roles(1)   := c_ORDS_OAUTH_ROLE_NAME;
+  v_ords_modules(1) := c_ORDS_MODULE_NAME;
+  ORDS.define_privilege(
+    p_privilege_name => c_ORDS_OAUTH_PRIV_NAME,
+    p_roles          => v_ords_roles,
+    p_patterns       => v_ords_patterns,
+    p_modules        => v_ords_modules,
+    p_label          => 'ORDS privilege for Apex applicarion deployment',
+    p_description    => NULL,
+    p_comments       => NULL
+  );
+  
+  -- Delete ORDS oauth client credential
+  OAUTH.delete_client(p_name => c_ORDS_OAUTH_CLIENT_NAME);
+  
+  -- Create ORDS oauth client credential
+  OAUTH.create_client(
+    p_name            => c_ORDS_OAUTH_CLIENT_NAME,
+    p_grant_type      => 'client_credentials',
+    p_owner           => 'APEX Owner',
+    p_description     => 'This is to authenticate for the Apex application deployment APIs',
+    p_support_email   => c_ORDS_OAUTH_CLIENT_EMAIL,
+    p_privilege_names => c_ORDS_OAUTH_PRIV_NAME
+  );
+  
+  -- Grant ORDS role to oauth client
+  OAUTH.grant_client_role(
+    p_client_name => c_ORDS_OAUTH_CLIENT_NAME,
+    p_role_name   => c_ORDS_OAUTH_ROLE_NAME
+  );
+  
+  COMMIT;
+END;
+/
+SHOW ERROR
+
+SELECT t.client_id, t.client_secret FROM user_ords_clients t WHERE t.name = APEX_APP_DEPLOY.get_deploy_oauth_client_name();

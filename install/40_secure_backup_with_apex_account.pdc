@@ -1,0 +1,80 @@
+WHENEVER SQLERROR EXIT SQL.SQLCODE ROLLBACK
+
+-- Checking username
+SET FEEDBACK OFF;
+BEGIN IF USER = 'SYS' THEN RAISE_APPLICATION_ERROR(-20000, 'DO NOT RUNNING AS SYS!'); END IF; END;
+/
+
+SET FEEDBACK ON;
+SET SERVEROUTPUT ON;
+DECLARE
+  c_WORKSPACE_NAME           CONSTANT VARCHAR2(100) := UPPER('APEX_ADMIN');  -- Apex workspace name
+  c_USER_DEFAULT_SCHEMA      CONSTANT VARCHAR2(100) := UPPER('APEX_ADMIN');  -- Apex workspace administrator user default database schema
+  c_NEW_WS_USER              CONSTANT VARCHAR2(100) := UPPER('BACKUP');      -- Apex workspace administrator user name
+  c_NEW_WS_USER_PASSWORD     CONSTANT VARCHAR2(100) := 'secret';             -- Apex workspace administrator user password
+  c_NEW_WS_USER_EMAIL        CONSTANT VARCHAR2(100) := 'backup@company.com'; -- Apex workspace administrator user email address
+  c_ORDS_MODULE_NAME         CONSTANT VARCHAR2(100) := APEX_APP_DEPLOY.GC_ORDS_BK_MODULE_NAME;
+  c_ORDS_PRIV_NAME           CONSTANT VARCHAR2(100) := APEX_APP_DEPLOY.GC_ORDS_BK_PRIVILEGE_NAME;
+  c_ORDS_ROLE_NAME           CONSTANT VARCHAR2(100) := APEX_APP_DEPLOY.GC_ORDS_BK_ROLE_NAME;
+  v_group_id                 NUMBER;
+  v_ords_roles               SYS.OWA.vc_arr;
+  v_ords_modules             SYS.OWA.vc_arr;
+  v_ords_patterns            SYS.OWA.vc_arr;
+BEGIN
+  APEX_UTIL.set_security_group_id(p_security_group_id => APEX_UTIL.find_security_group_id(p_workspace => c_WORKSPACE_NAME));
+  APEX_APPLICATION.g_user := USER;
+  
+  -- Checking ORDS Module
+  IF NOT APEX_APP_DEPLOY.is_module_exists THEN
+    RAISE_APPLICATION_ERROR(-20000, 'MODULE DOES NOT EXISTS! (' || c_ORDS_MODULE_NAME || ')');
+  END IF;
+  
+  -- Create Apex workspace group
+  v_group_id := APEX_UTIL.get_group_id(c_ORDS_ROLE_NAME); 
+  IF v_group_id IS NULL THEN
+    v_group_id := wwv_flow_id.next_val;
+    APEX_UTIL.create_user_group(
+      p_id                => v_group_id,
+      p_group_name        => c_ORDS_ROLE_NAME,
+      p_group_desc        => 'DO NOT CHANGE GROUP NAME!'
+    );
+  END IF;
+  
+  -- Create Apex workspace user
+  IF APEX_UTIL.get_user_id(c_NEW_WS_USER) IS NULL THEN
+    APEX_UTIL.create_user(
+      p_user_name                    => c_NEW_WS_USER,
+      p_first_name                   => '',
+      p_last_name                    => '',
+      p_email_address                => c_NEW_WS_USER_EMAIL,
+      p_default_schema               => c_USER_DEFAULT_SCHEMA,
+      p_web_password                 => c_NEW_WS_USER_PASSWORD,
+      p_group_ids                    => v_group_id,
+      p_change_password_on_first_use => 'N'
+    );
+  END IF;
+  
+  -- Delete ORDS role and privilege
+  ORDS.delete_role(p_role_name => c_ORDS_ROLE_NAME);
+  ORDS.delete_privilege(p_name => c_ORDS_PRIV_NAME);
+  
+  -- Create ORDS role
+  ORDS.create_role(p_role_name => c_ORDS_ROLE_NAME);
+  
+  -- Create ORDS privilege
+  v_ords_roles(1)   := c_ORDS_ROLE_NAME;
+  v_ords_modules(1) := c_ORDS_MODULE_NAME;
+  ORDS.define_privilege(
+    p_privilege_name => c_ORDS_PRIV_NAME,
+    p_roles          => v_ords_roles,
+    p_patterns       => v_ords_patterns,
+    p_modules        => v_ords_modules,
+    p_label          => 'ORDS privilege for Apex applicarion deployment',
+    p_description    => NULL,
+    p_comments       => NULL
+  );
+  
+  COMMIT;
+END;
+/
+SHOW ERROR
