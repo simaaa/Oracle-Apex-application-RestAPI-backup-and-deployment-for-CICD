@@ -1,6 +1,10 @@
 ## Usage
 Services: [Backup](USAGE.md#backup), [Delete](USAGE.md#delete), [Deploy (import)](/USAGE.md#deploy-import), [Oauth example](/USAGE.md#oauth-example)
 
+## Security
+At least basic authentication is strongly recommended. Use without authentication is not recommended!
+- #### Basic authentication: '--user <apex_workspace_user_name>:<apex_workspace_user_password>"
+- #### Oauth authentication: '-H "Authorization: Bearer <previously_queried_token>"'
 ## Backup
 
 #### Linux:
