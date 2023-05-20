@@ -1,5 +1,5 @@
 ## Usage
-Services: backup, delete, import
+Services: Backup, Delete, Deploy (import)
 
 ## Backup
 
@@ -29,6 +29,8 @@ curl -X GET --remote-name --remote-header-name ^
 ```
 
 ## Delete
+#### Configuration parameter in the header:
+- X-Target-Workspace: Apex workspace name where the application to be deleted is located
 ```
 curl -X DELETE ^
   --user deploy:secret ^
@@ -37,12 +39,15 @@ curl -X DELETE ^
 ```
 
 ## Deploy (import)
+#### Configuration parameters in the header:
+- X-Target-Workspace: Apex workspace name where to deploy/import the file
+- Content-Type: Importable file type, sql or zip ("application/sql", "application/zip")
 ```
 curl -X PUT ^
-  --user %BASIC_AUTH% ^
-  -H "X-Target-Workspace: %WORKSPACE%" ^
+  --user deploy:secret ^
+  -H "X-Target-Workspace: APEX_ADMIN" ^
   -H "Content-Type: application/sql" ^
-  --data-binary @f%APP_ID%.sql ^
+  --data-binary @f666.sql ^
   http://localhost:8080/ords-pdb1/admin/deploy/app/666
 
 ```
