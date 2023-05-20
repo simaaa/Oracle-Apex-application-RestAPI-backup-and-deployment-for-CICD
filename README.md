@@ -3,16 +3,17 @@ This is a simple solution for quickly backing up and deploying Apex applications
 ## Description
 You can backup and deploy Oracle Apex applications very simple with curl commands. The RestAPI solution is defnied in ORDS and Apex applications are managed using an Oracle database stored procedures (package). To use basic authentication, we create an APEX workspace with users, for separate backup and deployment.
 
-## Usage
-#### RestAPI configuration
-- ##### Apex application id
+## RestAPI configuration
+#### Apex application id
 Defined in the url, for example when application id=666: ````http://localhost:8080/ords-pdb1/admin/backup/app/666````
-- ##### Authentication
+#### Authentication
 Set the username and password for basic authentication with curl ````--user```` parameter or in the http header when using oauth.
-- ##### Backup content type
+#### Backup content type
 Set the backup type in the "Accept" header variable using the following.
 - application/sql: Apex application backup in sql script format
 - application/zip: Apex application backup in yaml compressed format (zip)
+
+## Usage
 #### Linux:
 ```
 curl -X GET --remote-name --remote-header-name \
