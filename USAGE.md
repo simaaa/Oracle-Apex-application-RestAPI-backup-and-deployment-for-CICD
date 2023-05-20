@@ -1,6 +1,5 @@
 ## Usage
-Services: [Backup](USAGE.md#backup), [Delete](USAGE.md#delete), [Deploy (import)](/USAGE.md#deploy)
-[Oauth examples](/USAGE.md#oauth)
+Services: [Backup](USAGE.md#backup), [Delete](USAGE.md#delete), [Deploy (import)](/USAGE.md#deploy-import), [Oauth examples](/USAGE.md#oauth-example)
 
 [DELETE](https://github.com/simaaa/Oracle-Apex-application-RestAPI-backup-and-deployment-for-CICD/blob/main/USAGE.md#delete)
 
@@ -54,7 +53,7 @@ curl -X PUT ^
   http://localhost:8080/ords-pdb1/admin/deploy/app/666
 ```
 
-##Oauth example
+## Oauth example
 ```
 curl -X GET --remote-name --remote-header-name ^
   --user deploy:secret ^
