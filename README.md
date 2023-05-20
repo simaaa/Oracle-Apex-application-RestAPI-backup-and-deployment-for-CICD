@@ -41,13 +41,12 @@ This solution requires a working [Oracle Application Express - APEX](https://ape
 [Installation](install/README.md)
 
 ## Security
-Execute scripts as APEX_ADMIN database user.
+For security settings, run the following scripts with APEX_ADMIN database user
 #### Basic authentication with Apex workspace users
 ```
 40_secure_backup_with_apex_account.pdc
 40_secure_deploy_with_apex_account.pdc
 ```
-
 #### Oauth authentication
 ```
 41_oauth_install_backup.pdc
