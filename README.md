@@ -1,7 +1,7 @@
 # Oracle Apex application RestAPI backup and deployment for CI/CD
 This is a simple solution for quickly backing up and deploying Apex applications using RestAPI /ORDS/. You can use this for CI/CD.
 ## Description
-You can backup and deploy Oracle Apex applications very simple with curl commands. The RestAPI solution is defnied in ORDS and Apex applications are managed using an Oracle database stored procedures (package). For basic authentication creating APEX workspace with users for backup and deplyoment.
+You can backup and deploy Oracle Apex applications very simple with curl commands. The RestAPI solution is defnied in ORDS and Apex applications are managed using an Oracle database stored procedures (package). To use basic authentication, we create an APEX workspace with users, for separate backup and deployment.
 
 ## Usage
 #### Linux:
